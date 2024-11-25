@@ -1,0 +1,11 @@
+{
+  "dependencies": [
+    "backward-cpp",
+    "boost",
+    "cpu-features",
+    "fmt",
+    "minizip-ng",
+    "spdlog",
+    "gtest"
+  ]
+}
