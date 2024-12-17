@@ -3,9 +3,10 @@
     "backward-cpp",
     "boost",
     "cpu-features",
+    "eigen3",
     "fmt",
+    "gtest",
     "minizip-ng",
-    "spdlog",
-    "gtest"
+    "spdlog"
   ]
 }
