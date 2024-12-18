@@ -1,14 +1,15 @@
 import os
 import sys
+import platform
 import subprocess
 import shutil
-import asyncio
-import aiohttp
+import urllib.request
 from zipfile import ZipFile
 
 working_dir_before_execute = os.getcwd()
 script_root = os.path.dirname(os.path.realpath(__file__))
 working_dir_stack = list()
+platform_name = None
 
 def chdir(path: str):
     os.chdir(path)
@@ -31,38 +32,64 @@ def remove_dir(dir : str):
     if os.path.isdir(str):
         shutil.rmtree(dir)
 
-async def download_file(url):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if "content-disposition" in response.headers:
-                header = response.headers["content-disposition"]
-                filename = header.split("filename=")[1]
-            else:
-                filename = url.split("/")[-1]
-            print(f"Downloading {filename} from {url} ...")
-            with open(filename, mode="wb") as file:
-                while True:
-                    chunk = await response.content.read()
-                    if not chunk:
-                        break
-                    file.write(chunk)
-            print(f"Downloaded {filename}")
+def download_file(url, filename):
+    if not os.path.exists(filename):
+        print(f"Downloading {filename} ...")
+        urllib.request.urlretrieve(url, filename)
+    print(f"Downloaded {filename}")
 
 def extract_zip(filename, path="."):
     with ZipFile(filename, "r") as zip:
         zip.extractall(path)
 
-async def main() -> int:
+def build_SDL():
+    print(f"Build Platform: {platform_name}")
+    chdir(script_root + "/" + platform_name)
+    if not os.path.exists("SDL"):
+        run("git clone https://github.com/libsdl-org/SDL.git --depth=1")
+    chdir("SDL")
+    run("git checkout 5608bf5866ee2b6749990f0e2b70026c0e43b3e5")
+    run("git submodule update --init --recursive")
+    install_dir = os.getcwd() + "/installed"
+    run(f"cmake -S . -B build -D CMAKE_INSTALL_PREFIX={install_dir}")
+    run(f"cmake --build build --target install --config Release")
+
+def build_SDL_mixer():
+    chdir(script_root + "/" + platform_name)
+    if not os.path.exists("SDL_mixer"):
+        run("git clone https://github.com/libsdl-org/SDL_mixer.git --depth=1")
+    chdir("SDL_mixer")
+    run("git checkout 90859376266adcd602499e94e0ac0c10fb55f712")
+    run("git submodule update --init --recursive")
+    install_dir = os.getcwd() + "/installed"
+    sdl3_dir = script_root + f"/{platform_name}/SDL/installed"
+    run(f"cmake -S . -B build -D CMAKE_INSTALL_PREFIX=\"{install_dir}\"",
+                   env=dict(os.environ, SDL3_DIR=sdl3_dir))
+    run(f"cmake --build build --target install --config Release")
+
+def main() -> int:
     try:
+        global platform_name
+        if platform.machine() == "AMD64":
+            if platform.system() == "Windows":
+                platform_name = "x64-windows"
+            if platform.system() == "Linux":
+                platform_name = "x64-linux"
+        if platform is None:
+            print("Cannot determine the target platform!")
+            return 0
+        if not os.path.exists(platform_name):
+            os.mkdir(platform_name)
+
+        print(f"Build Platform: {platform_name}")
+
         chdir(script_root)
-        if not os.path.exists("x64-windows"):
-            os.mkdir("x64-windows")
-        chdir("x64-windows")
-        urls = []
-        if not os.path.exists("mysql-connector-c++-9.1.0-winx64.zip"):
-            urls.append("https://dev.mysql.com/get/Downloads/Connector-C++/mysql-connector-c++-9.1.0-winx64.zip")
-        downloads = [download_file(url) for url in urls]
-        await asyncio.gather(*downloads)
+        build_SDL()
+        build_SDL_mixer()
+
+        chdir(script_root)
+        chdir(platform_name)
+        download_file("https://dev.mysql.com/get/Downloads/Connector-C++/mysql-connector-c++-9.1.0-winx64.zip", "mysql-connector-c++-9.1.0-winx64.zip")
         extract_zip("mysql-connector-c++-9.1.0-winx64.zip")
         chdir(working_dir_before_execute)
         return 0
@@ -72,4 +99,4 @@ async def main() -> int:
         return -1
 
 if __name__ == '__main__':
-    sys.exit(asyncio.run(main()))
+    sys.exit(main())
