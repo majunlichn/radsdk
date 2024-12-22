@@ -48,10 +48,10 @@ def build_SDL():
     if not os.path.exists("SDL"):
         run("git clone https://github.com/libsdl-org/SDL.git")
     chdir("SDL")
-    run("git checkout 5608bf5866ee2b6749990f0e2b70026c0e43b3e5")
+    run("git checkout 56cf8d8dc9cf37cf8d1e4b2538a132f995ea57e3")
     run("git submodule update --init --recursive")
     install_dir = os.getcwd() + "/installed"
-    run(f"cmake -S . -B build -D CMAKE_INSTALL_PREFIX={install_dir}")
+    run(f"cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX={install_dir}")
     run(f"cmake --build build --target install --config Release")
 
 def build_SDL_mixer():
@@ -63,7 +63,7 @@ def build_SDL_mixer():
     run("git submodule update --init --recursive")
     install_dir = os.getcwd() + "/installed"
     sdl3_dir = script_root + f"/{platform_name}/SDL/installed"
-    run(f"cmake -S . -B build -D CMAKE_INSTALL_PREFIX=\"{install_dir}\"",
+    run(f"cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=\"{install_dir}\"",
                    env=dict(os.environ, SDL3_DIR=sdl3_dir))
     run(f"cmake --build build --target install --config Release")
 
