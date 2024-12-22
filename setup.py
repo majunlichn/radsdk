@@ -46,7 +46,7 @@ def build_SDL():
     print(f"Build Platform: {platform_name}")
     chdir(script_root + "/" + platform_name)
     if not os.path.exists("SDL"):
-        run("git clone https://github.com/libsdl-org/SDL.git --depth=1")
+        run("git clone https://github.com/libsdl-org/SDL.git")
     chdir("SDL")
     run("git checkout 5608bf5866ee2b6749990f0e2b70026c0e43b3e5")
     run("git submodule update --init --recursive")
@@ -57,7 +57,7 @@ def build_SDL():
 def build_SDL_mixer():
     chdir(script_root + "/" + platform_name)
     if not os.path.exists("SDL_mixer"):
-        run("git clone https://github.com/libsdl-org/SDL_mixer.git --depth=1")
+        run("git clone https://github.com/libsdl-org/SDL_mixer.git")
     chdir("SDL_mixer")
     run("git checkout 90859376266adcd602499e94e0ac0c10fb55f712")
     run("git submodule update --init --recursive")
