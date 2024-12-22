@@ -1,10 +1,12 @@
 {
   "dependencies": [
+    "assimp",
     "backward-cpp",
     "boost",
     "cpu-features",
     "eigen3",
     "fmt",
+    "glm",
     "gtest",
     "minizip-ng",
     "spdlog"
