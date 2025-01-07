@@ -1,8 +1,8 @@
 # radsdk
 
-radsdk is a software development kit that contains common and popular C/C++ libraries.
+radsdk is a software development kit that contains common C/C++ libraries.
 
-radsdk is easy to setup and use. The repository provides build scripts to download, build and install libraries, with prebuilt binaries to save you time.
+radsdk is easy to setup and use. The repository provides build scripts to download, build and install libraries, with some prebuilt binaries to save you time.
 
 # Usage
 
@@ -17,7 +17,7 @@ cd vcpkg
 $env:VCPKG_ROOT="C:\path\to\vcpkg" # Linux: export VCPKG_ROOT="/path/to/vcpkg"
 ```
 
-Then download and build the libraries with the python script `setup.py`:
+Then download and build the libraries by executing the python script `setup.py`:
 
 ```powershell
 cd radsdk
