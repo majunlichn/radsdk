@@ -36,13 +36,21 @@ def download_file(url, filename):
     if not os.path.exists(filename):
         print(f"Downloading {filename} ...")
         urllib.request.urlretrieve(url, filename)
-    print(f"Downloaded {filename}")
+        print(f"Downloaded")
+    else:
+        print(f"File Existed: {filename}")
 
 def extract_zip(filename, path="."):
     print(f"Extracting {filename} ...")
+    if not os.path.exists(path):
+        os.makedirs(path)
     with ZipFile(filename, "r") as zip:
         zip.extractall(path)
-    print(f"Extracted {filename}")
+        print(f"Extracted")
+
+def download_and_extract_zip(url, filename, extract_path="."):
+    download_file(url, filename)
+    extract_zip(filename, extract_path)
 
 def build_SDL():
     chdir(script_root + "/" + triplet)
@@ -70,7 +78,18 @@ def build_SDL_mixer():
                    env=dict(os.environ, SDL3_DIR=sdl3_dir))
     run(f"cmake --build build --target install --config Release")
 
+def setup_windows(tasks):
+    chdir(triplet)
+    if "mysql" in tasks:
+        download_and_extract_zip("https://dev.mysql.com/get/Downloads/Connector-C++/mysql-connector-c++-9.1.0-winx64.zip", "mysql-connector-c++-9.1.0-winx64.zip")
+    if "dependencywalker" in tasks:
+        download_and_extract_zip("https://dependencywalker.com/depends22_x64.zip", "depends22_x64.zip", "depends22_x64")
+
 def main() -> int:
+    tasks = sys.argv[1:]
+    if not tasks:
+        tasks = ["vcpkg", "SDL", "mysql", "dependencywalker"]
+    print(f"Tasks: {tasks}")
     try:
         global triplet
         if platform.machine() == "AMD64":
@@ -85,17 +104,21 @@ def main() -> int:
             os.mkdir(triplet)
 
         print(f"Target Triplet: {triplet}")
-
         chdir(script_root)
-        run("vcpkg install")
-        build_SDL()
-        build_SDL_mixer()
 
+        if "vcpkg" in tasks:
+            run("vcpkg install")
         chdir(script_root)
+
+        if "SDL" in tasks:
+            build_SDL()
+            build_SDL_mixer()
+        chdir(script_root)
+
         if triplet == "x64-windows":
-            chdir(triplet)
-            download_file("https://dev.mysql.com/get/Downloads/Connector-C++/mysql-connector-c++-9.1.0-winx64.zip", "mysql-connector-c++-9.1.0-winx64.zip")
-            extract_zip("mysql-connector-c++-9.1.0-winx64.zip")
+            setup_windows(tasks)
+        chdir(script_root)
+
         chdir(working_dir_before)
         return 0
     except Exception as e:
