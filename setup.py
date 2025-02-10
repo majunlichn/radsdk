@@ -60,7 +60,7 @@ def build_SDL():
     run("git pull")
     run("git checkout 8ec576ddabdc7edfd68e7a8a3214e84e4026328d")
     run("git submodule update --init --recursive")
-    install_dir = os.getcwd() + "/installed"
+    install_dir = os.getcwd() + "/build/installed"
     run(f"cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX={install_dir}")
     run(f"cmake --build build --target install --config Release")
 
@@ -72,8 +72,8 @@ def build_SDL_mixer():
     run("git pull")
     run("git checkout 48701864697a904b3a771dcd20b5b6740f1c1d5c")
     run("git submodule update --init --recursive")
-    install_dir = os.getcwd() + "/installed"
-    sdl3_dir = script_root + f"/{triplet}/SDL/installed"
+    install_dir = os.getcwd() + "/build/installed"
+    sdl3_dir = script_root + f"/{triplet}/SDL/build/installed"
     run(f"cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=\"{install_dir}\"",
                    env=dict(os.environ, SDL3_DIR=sdl3_dir))
     run(f"cmake --build build --target install --config Release")
