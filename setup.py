@@ -29,7 +29,7 @@ def run(command : str, env = os.environ):
     subprocess.run(command, shell=True, env=env)
 
 def remove_dir(dir : str):
-    if os.path.isdir(str):
+    if os.path.isdir(dir):
         shutil.rmtree(dir)
 
 def download_file(url, filename):
@@ -81,9 +81,19 @@ def build_SDL_mixer():
 def setup_windows(tasks):
     chdir(triplet)
     if "mysql" in tasks:
-        download_and_extract_zip("https://dev.mysql.com/get/Downloads/Connector-C++/mysql-connector-c++-9.1.0-winx64.zip", "mysql-connector-c++-9.1.0-winx64.zip")
+        download_and_extract_zip("https://dev.mysql.com/get/Downloads/Connector-C++/mysql-connector-c++-9.1.0-winx64.zip",
+                                 "mysql-connector-c++-9.1.0-winx64.zip")
     if "dependencywalker" in tasks:
-        download_and_extract_zip("https://dependencywalker.com/depends22_x64.zip", "depends22_x64.zip", "depends22_x64")
+        download_and_extract_zip("https://dependencywalker.com/depends22_x64.zip",
+                                 "depends22_x64.zip", "depends22_x64")
+    if "libtorch-cpu" in tasks:
+        remove_dir("libtorch")
+        download_and_extract_zip("https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-2.6.0%2Bcpu.zip",
+                                 "libtorch-win-shared-with-deps-2.6.0+cpu.zip")
+    if "libtorch-cuda" in tasks:
+        remove_dir("libtorch")
+        download_and_extract_zip("https://download.pytorch.org/libtorch/cu126/libtorch-win-shared-with-deps-2.6.0%2Bcu126.zip",
+                                 "libtorch-win-shared-with-deps-2.6.0+cu126.zip")
 
 def main() -> int:
     tasks = sys.argv[1:]
