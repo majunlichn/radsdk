@@ -78,8 +78,20 @@ def build_SDL_mixer():
                    env=dict(os.environ, SDL3_DIR=sdl3_dir))
     run(f"cmake --build build --target install --config Release")
 
+def build_llamacpp(backend : str):
+    chdir(script_root + "/" + triplet)
+    if not os.path.exists("llama.cpp"):
+        run("git clone https://github.com/ggml-org/llama.cpp.git")
+    chdir("llama.cpp")
+    run("git pull")
+    run("git submodule update --init --recursive")
+    install_dir = os.getcwd() + "/build/installed"
+    if backend == "vulkan":
+        run(f"cmake -S . -B build -D GGML_VULKAN=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=\"{install_dir}\"")
+    run(f"cmake --build build --target install --config Release")
+
 def setup_windows(tasks):
-    chdir(triplet)
+    chdir(script_root + "/" + triplet)
     if "mysql" in tasks:
         download_and_extract_zip("https://dev.mysql.com/get/Downloads/Connector-C++/mysql-connector-c++-9.1.0-winx64.zip",
                                  "mysql-connector-c++-9.1.0-winx64.zip")
@@ -123,6 +135,10 @@ def main() -> int:
         if "SDL" in tasks:
             build_SDL()
             build_SDL_mixer()
+        chdir(script_root)
+
+        if "llama.cpp-vulkan" in tasks:
+            build_llamacpp("vulkan")
         chdir(script_root)
 
         if triplet == "x64-windows":
